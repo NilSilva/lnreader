@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, SectionList, Text } from 'react-native';
 import dayjs from 'dayjs';
 import { Portal } from 'react-native-paper';
@@ -15,8 +15,9 @@ import { History } from '@database/types';
 import { getString } from '@strings/translations';
 import ClearHistoryDialog from './components/ClearHistoryDialog';
 import HistorySkeletonLoading from './components/HistorySkeletonLoading';
+import { HistoryScreenProps } from '@navigators/types';
 
-const HistoryScreen = () => {
+const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const theme = useTheme();
   const {
     isLoading,
@@ -69,6 +70,23 @@ const HistoryScreen = () => {
     setTrue: openClearHistoryDialog,
     setFalse: closeClearHistoryDialog,
   } = useBoolean();
+
+  useEffect(
+    () =>
+      navigation.addListener('tabPress', e => {
+        let lastNovel = history[0];
+        if (navigation.isFocused() && lastNovel) {
+          e.preventDefault();
+
+          navigation.navigate('Novel', {
+            name: lastNovel.novelName,
+            path: lastNovel.novelPath,
+            pluginId: lastNovel.pluginId,
+          });
+        }
+      }),
+    [navigation, history],
+  );
 
   return (
     <>
